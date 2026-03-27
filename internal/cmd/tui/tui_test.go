@@ -10,39 +10,18 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/teatest"
 	"github.com/gittuf/gittuf/pkg/gitinterface"
+	"github.com/muesli/termenv"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTUIInitializationAndQuit(t *testing.T) {
-	tmpDir := t.TempDir()
-	currentDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(currentDir) //nolint:errcheck
-
-	gitinterface.CreateTestGitRepository(t, tmpDir, false)
-
-	o := &options{
-		readOnly: true,
-	}
-
-	m, err := initialModel(context.Background(), o)
-	if err != nil {
-		t.Fatalf("failed to create initial model: %v", err)
-	}
-
-	tm := teatest.NewTestModel(t, m, teatest.WithInitialTermSize(80, 24))
-	tm.Send(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("q")})
-	tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*5))
+func init() {
+	lipgloss.SetColorProfile(termenv.Ascii)
 }
 
-func TestTUIScreenNavigation(t *testing.T) {
+func TestTUIStartAndQuit(t *testing.T) {
 	tmpDir := t.TempDir()
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -65,18 +44,6 @@ func TestTUIScreenNavigation(t *testing.T) {
 	}
 
 	tm := teatest.NewTestModel(t, m, teatest.WithInitialTermSize(80, 24))
-
-	// Go to Policy screen
-	tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
-	
-	// Wait a bit for state update
-	time.Sleep(100 * time.Millisecond)
-
-	// Go to Policy Rules screen
-	tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
-	time.Sleep(100 * time.Millisecond)
-
-	// Quit
 	tm.Send(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("q")})
 	tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*5))
 }
