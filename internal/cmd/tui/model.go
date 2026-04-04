@@ -30,6 +30,7 @@ const (
 	screenTrustGlobalRules                  // Global rule management screen
 	screenTrustAddGlobalRule                // Form: add a new global rule
 	screenTrustEditGlobalRule               // Form: edit selected global rule (prefilled)
+	screenHelp                              // Generic Help screen displaying keybindings
 )
 
 type item struct {
@@ -66,8 +67,12 @@ type model struct {
 	footer           string
 	errorMsg         string
 	readOnly         bool
+	width            int
+	height           int
 	confirmDelete    bool
 	deleteTarget     string
+	showHelp         bool
+	previousScreen   screen
 }
 
 // inputField describes a single text input's placeholder and prompt label.
@@ -140,7 +145,7 @@ func initialModel(ctx context.Context, o *options) (model, error) {
 				return model{}, fmt.Errorf("failed to load signing key from Git config: %w", err)
 			}
 			readOnly = true
-			footer = "No signing key found in Git config, running in read-only mode."
+			footer = "READ ONLY MODE. Press 'h' to view help."
 		}
 	}
 

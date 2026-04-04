@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/gittuf/gittuf/internal/tuf"
 )
 
@@ -19,12 +18,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		h, v := lipgloss.NewStyle().Margin(1, 2).GetFrameSize()
-		m.choiceList.SetSize(msg.Width-h, msg.Height-v)
-		m.policyScreenList.SetSize(msg.Width-h, msg.Height-v)
-		m.trustScreenList.SetSize(msg.Width-h, msg.Height-v)
-		m.ruleList.SetSize(msg.Width-h, msg.Height-v)
-		m.globalRuleList.SetSize(msg.Width-h, msg.Height-v)
+		m.width = msg.Width
+		m.height = msg.Height
+		
+		// Calculate inner constraints
+		// Margin: top 1, bottom 1, left 2, right 2
+		// Box: border 1+1, padding 0, 1 -> left 1, right 1
+		// Additional height: Status bar (1), helps/footer (~3)
+		innerWidth := m.width - 8
+		if innerWidth < 0 {
+			innerWidth = 0
+		}
+		innerHeight := m.height - 8
+		if innerHeight < 0 {
+			innerHeight = 0
+		}
+
+		m.choiceList.SetSize(innerWidth, innerHeight)
+		m.policyScreenList.SetSize(innerWidth, innerHeight)
+		m.trustScreenList.SetSize(innerWidth, innerHeight)
+		m.ruleList.SetSize(innerWidth, innerHeight)
+		m.globalRuleList.SetSize(innerWidth, innerHeight)
+
+		return m, nil
 
 	case tea.KeyMsg:
 		// Delete confirmation overlay intercepts all keys
@@ -42,6 +58,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.screen != screenTrustAddGlobalRule && m.screen != screenTrustEditGlobalRule {
 				return m, tea.Quit
 			}
+		case "h":
+			// Toggle help screen if not in form mode
+			if m.screen != screenPolicyAddRule && m.screen != screenPolicyEditRule &&
+				m.screen != screenTrustAddGlobalRule && m.screen != screenTrustEditGlobalRule {
+				if m.screen == screenHelp {
+					// Toggle back
+					m.screen = m.previousScreen
+					return m, nil
+				}
+				// Go to help screen
+				m.previousScreen = m.screen
+				m.screen = screenHelp
+				return m, nil
+			}
 		case "esc":
 			m.footer = ""
 			switch m.screen {
@@ -55,6 +85,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.screen = screenTrust
 			case screenTrustAddGlobalRule, screenTrustEditGlobalRule:
 				m.screen = screenTrustGlobalRules
+			case screenHelp:
+				m.screen = m.previousScreen
 			}
 			return m, nil
 		}
