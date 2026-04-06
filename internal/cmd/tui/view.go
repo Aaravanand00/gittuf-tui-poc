@@ -14,19 +14,21 @@ import (
 const (
 	colorRegularText = "#FFFFFF"
 	colorFocus       = "#007AFF"
+	colorAccent      = "#007AFF"
+	colorBorder      = "#1E3A5F"
 	colorBlur        = "#A0A0A0"
-	colorFooter      = "#11ff00"
-	colorSubtext     = "#555555"
-	colorErrorMsg    = "#FF0000"
-	colorStatusBg    = "#1a1a2e"
+	colorFooter      = "#007AFF"
+	colorSubtext     = "#A0A0A0"
+	colorErrorMsg    = "#FF5252"
+	colorStatusBg    = "#1A1A2E"
 	colorEditMode    = "#007AFF"
 	colorReadOnly    = "#FF6B6B"
-	colorHelpKeyBg   = "#2a2a3e"
+	colorHelpKeyBg   = "#2A2A3E"
 )
 
 var (
 	titleStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(colorRegularText)).
+			Foreground(lipgloss.Color(colorAccent)).
 			Padding(0, 2).
 			MarginTop(1).
 			Bold(true)
@@ -37,8 +39,9 @@ var (
 
 	selectedItemStyle = lipgloss.NewStyle().
 				PaddingLeft(4).
-				Foreground(lipgloss.Color(colorRegularText)).
-				Background(lipgloss.Color(colorFocus))
+				Foreground(lipgloss.Color("#FFFFFF")).
+				Background(lipgloss.Color(colorFocus)).
+				Bold(true)
 
 	focusedStyle = lipgloss.NewStyle().
 			PaddingLeft(4)
@@ -47,7 +50,7 @@ var (
 			Foreground(lipgloss.Color(colorBlur))
 
 	cursorStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color(colorRegularText))
+			Foreground(lipgloss.Color(colorAccent))
 
 	// Status bar — top pe dikhta hai, current screen aur mode batata hai
 	statusBarStyle = lipgloss.NewStyle().
@@ -57,7 +60,7 @@ var (
 			Width(80)
 
 	statusTitleStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color(colorRegularText)).
+				Foreground(lipgloss.Color(colorAccent)).
 				Background(lipgloss.Color(colorStatusBg)).
 				Bold(true).
 				Padding(0, 1)
@@ -69,26 +72,26 @@ var (
 
 	statusEditModeStyle = lipgloss.NewStyle().
 				Background(lipgloss.Color(colorEditMode)).
-				Foreground(lipgloss.Color(colorRegularText)).
+				Foreground(lipgloss.Color("#FFFFFF")).
 				Padding(0, 1).
 				Bold(true)
 
 	statusReadOnlyStyle = lipgloss.NewStyle().
 				Background(lipgloss.Color(colorReadOnly)).
-				Foreground(lipgloss.Color(colorRegularText)).
+				Foreground(lipgloss.Color("#FFFFFF")).
 				Padding(0, 1).
 				Bold(true)
 
 	// Screen box — content ke around border
 	screenBoxStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color(colorFocus)).
+			BorderForeground(lipgloss.Color(colorBorder)).
 			Padding(0, 1)
 
 	// Help bar key aur description styles
 	helpKeyStyle = lipgloss.NewStyle().
 			Background(lipgloss.Color(colorHelpKeyBg)).
-			Foreground(lipgloss.Color(colorFocus)).
+			Foreground(lipgloss.Color(colorAccent)).
 			Padding(0, 1)
 
 	helpDescStyle = lipgloss.NewStyle().
