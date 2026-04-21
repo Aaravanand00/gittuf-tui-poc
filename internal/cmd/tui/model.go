@@ -72,6 +72,7 @@ type model struct {
 	confirmDelete    bool
 	deleteTarget     string
 	showHelp         bool
+	signerError      string
 	previousScreen   screen
 }
 
@@ -137,15 +138,20 @@ func initialModel(ctx context.Context, o *options) (model, error) {
 	readOnly := o.readOnly
 	var signer dsse.SignerVerifier
 	var footer string
+	var signerError string
 
 	if !readOnly {
 		signer, err = gittuf.LoadSigner(repo, o.p.SigningKey)
 		if err != nil {
-			if !errors.Is(err, gittuf.ErrSigningKeyNotSpecified) {
-				return model{}, fmt.Errorf("failed to load signing key from Git config: %w", err)
-			}
 			readOnly = true
-			footer = "READ ONLY MODE. Press 'h' to view help."
+			if errors.Is(err, gittuf.ErrSigningKeyNotSpecified) {
+				footer = "READ ONLY MODE. Press 'h' to view help."
+			} else {
+				// Integrate the error message and inform the user about read-only mode
+				mErr := strings.TrimPrefix(err.Error(), "failed to load signing key from Git config: ")
+				signerError = fmt.Sprintf("Signing key issue (%s). Switching to READ ONLY mode.", mErr)
+				footer = "READ ONLY MODE. You can still browse data."
+			}
 		}
 	}
 
@@ -157,6 +163,7 @@ func initialModel(ctx context.Context, o *options) (model, error) {
 		cursorMode:  cursor.CursorBlink,
 		repo:        repo,
 		signer:      signer,
+		signerError: signerError,
 		policyName:  o.policyName,
 		rules:       getCurrRules(ctx, o),
 		globalRules: getGlobalRules(ctx, o),

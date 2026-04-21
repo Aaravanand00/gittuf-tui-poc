@@ -117,6 +117,11 @@ func renderFooter(text string) string {
 // renderFooterBox wraps the footer in a rich info box if the user requests help in read-only mode.
 func renderFooterBox(m model) string {
 	baseFooter := renderFooter(m.footer)
+	var signerNotice string
+	
+	if m.signerError != "" {
+		signerNotice = lipgloss.NewStyle().Foreground(lipgloss.Color(colorBlur)).Italic(true).Render("Notice: " + m.signerError + " (Browsing in read-only mode)")
+	}
 
 	if m.readOnly && m.showHelp {
 		box := lipgloss.NewStyle().
@@ -126,12 +131,21 @@ func renderFooterBox(m model) string {
 			MarginTop(1)
 
 		title := lipgloss.NewStyle().Foreground(lipgloss.Color(colorReadOnly)).Bold(true).Render("⚠️ READ ONLY MODE")
-		explain := lipgloss.NewStyle().Foreground(lipgloss.Color(colorRegularText)).Render("You are in read-only mode because no signing key is configured.")
-		fix := lipgloss.NewStyle().Foreground(lipgloss.Color(colorSubtext)).Render("Fix steps:\n  - Run: " + lipgloss.NewStyle().Foreground(lipgloss.Color(colorFocus)).Bold(true).Render("gittuf trust init") + "\n  - Configure a signing key in Git")
+		explain := lipgloss.NewStyle().Foreground(lipgloss.Color(colorRegularText)).Render("You are currently in read-only mode.")
+		if m.signerError != "" {
+			explain = lipgloss.NewStyle().Foreground(lipgloss.Color(colorRegularText)).Render(m.signerError)
+		}
+		tip := lipgloss.NewStyle().Foreground(lipgloss.Color(colorFocus)).Render("Tip: You can still use the TUI to navigate and view all rules.")
+		fix := lipgloss.NewStyle().Foreground(lipgloss.Color(colorSubtext)).Render("Fix steps:\n  - Run: " + lipgloss.NewStyle().Foreground(lipgloss.Color(colorFocus)).Bold(true).Render("gittuf trust init") + "\n  - Ensure your GPG/SSH key is correctly configured in Git")
 
-		inner := lipgloss.JoinVertical(lipgloss.Left, title, "", explain, "", fix, "", baseFooter)
+		inner := lipgloss.JoinVertical(lipgloss.Left, title, "", explain, tip, "", fix, "", baseFooter)
 		return box.Render(inner)
 	}
+	
+	if signerNotice != "" {
+		return lipgloss.JoinVertical(lipgloss.Left, baseFooter, signerNotice)
+	}
+
 	return baseFooter
 }
 
